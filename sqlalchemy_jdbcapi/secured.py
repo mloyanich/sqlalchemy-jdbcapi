@@ -34,9 +34,10 @@ class SecuredJDBCDialect(BaseDialect, DefaultDialect):
         # restore original url
         s: str = str(url)
         # get jdbc url
-        s = s.split("//", 1)[-1]
-        jdbc_url: str = s.split("?")[0]
-        parsed_url = urlparse(s)
+        s = s.split("//")[-1].split("@")
+        user_pwd = s[0].split(":")
+        jdbc_url: str = s[-1].split("?")[0]
+        parsed_url = urlparse(s[-1])
         ds = parse_qs(parsed_url.query)
         # raise Exception(ds)
 
@@ -49,7 +50,7 @@ class SecuredJDBCDialect(BaseDialect, DefaultDialect):
             "jclassname": self.jdbc_driver_name,
             "url": jdbc_url,
             # pass driver args - username and password via JVM System settings
-            "driver_args": [ds['user'][0], ds['password'][0]]
+            "driver_args": [user_pwd[0], user_pwd[1]]
         }
         return (), kwargs
 
