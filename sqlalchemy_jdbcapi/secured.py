@@ -29,13 +29,14 @@ class SecuredJDBCDialect(BaseDialect, DefaultDialect):
     def create_connect_args(self, url):
         if url is None:
             return
-        # dialects expect jdbc url in the form of
-        # "jdbc:secured://example.com:19989?CustomProperties=(dataset=X)&user=xxx&password=xxx"
+        # dialects expect jdbc url in the form of. it will make all the modifications needed
+        # "jdbc:secured://<user>:<password>@example.com:19989/CustomProperties=(dataset=X)"
         # restore original url
         s: str = str(url)
         # get jdbc url
         s = s.split("//")[-1].split("@")
         user_pwd = s[0].split(":")
+        s[-1] = s[-1].replace("/", "?")
         jdbc_url: str = s[-1].split("?")[0]
         parsed_url = urlparse(s[-1])
         ds = parse_qs(parsed_url.query)
